@@ -1,12 +1,15 @@
-from django.http import HttpResponse
+import json
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from .models import Cliente, Carro
 import re
+from django.core import serializers
 
 
 def clientes(request):
     if request.method == 'GET':
-        return render(request, 'clientes.html')
+        clientes_list = Cliente.objects.all()
+        return render(request, 'clientes.html', {'clientes': clientes_list})
     elif request.method == 'POST':
         nome = request.POST.get('nome')
         sobrenome = request.POST.get('sobrenome')
@@ -38,3 +41,12 @@ def clientes(request):
             car.save()
 
     return HttpResponse('Teste')
+
+
+def att_cliente(request):
+    id_cliente = request.POST.get('id_cliente')
+    cliente = Cliente.objects.filter(id=id_cliente)
+    cliente_json = json.loads(serializers.serialize('json', cliente))[
+        0]['fields']
+
+    return JsonResponse(cliente_json)
